@@ -1,0 +1,13 @@
+---
+- name: Install Vector
+  yum:
+    name: vector
+    state: present
+  become: yes
+
+- name: Start Vector service
+  service:
+    name: vector
+    state: started
+    enabled: yes
+  become: yes
