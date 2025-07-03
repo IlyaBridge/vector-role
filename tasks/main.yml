@@ -1,4 +1,14 @@
 ---
+- name: Add Vector repository
+  yum_repository:
+    name: vector
+    description: Vector RPM repo
+    baseurl: https://packages.timber.io/vector/0.22.x/yum/el/7/x86_64/
+    gpgcheck: yes
+    gpgkey: https://packages.timber.io/vector/0.22.x/yum/el/7/x86_64/vector.gpg
+    enabled: yes
+  become: yes
+
 - name: Install Vector
   yum:
     name: vector
