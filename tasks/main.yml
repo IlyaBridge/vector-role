@@ -1,22 +1,46 @@
 ---
-- name: Add Vector repository
-  yum_repository:
-    name: vector
-    description: Vector RPM repo
-    baseurl: https://packages.timber.io/vector/0.22.x/yum/el/7/x86_64/
-    gpgcheck: yes
-    gpgkey: https://packages.timber.io/vector/0.22.x/yum/el/7/x86_64/vector.gpg
-    enabled: yes
+- name: Install Vector via direct download
+  block:
+    - name: Download Vector RPM package
+      get_url:
+        url: https://packages.timber.io/vector/0.35.0/vector-0.35.0-1.x86_64.rpm
+        dest: /tmp/vector.rpm
+
+    - name: Install Vector from local RPM
+      yum:
+        name: /tmp/vector.rpm
+        state: present
+      become: yes
+
+    - name: Remove temporary RPM file
+      file:
+        path: /tmp/vector.rpm
+        state: absent
   become: yes
 
-- name: Install Vector
-  yum:
-    name: vector
-    state: present
+- name: Ensure Vector config directory exists
+  file:
+    path: /etc/vector
+    state: directory
+    mode: 0755
   become: yes
 
-- name: Start Vector service
-  service:
+- name: Create minimal Vector config
+  copy:
+    dest: /etc/vector/vector.toml
+    content: |
+      [sources.in]
+      type = "stdin"
+
+      [sinks.out]
+      type = "console"
+      inputs = ["in"]
+      encoding.codec = "json"
+    mode: 0644
+  become: yes
+
+- name: Start and enable Vector service
+  systemd:
     name: vector
     state: started
     enabled: yes
